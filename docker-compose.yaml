@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    working_dir: /app
+    ports:
+      - "8000:8000"
+    pid: "host"      # Share PID namespace with the host
+    volumes:
+      - ./backend/data:/app/data  # Persist the data folder for SQLite or other files
+      - ~/pipe:/hostpipe  # Mount the named pipe directory
+      - ~/:/output  # Mount the home directory for output files
+
+      
+    #environment:
+    #  - DATABASE_URL=sqlite:///app/data/data.db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+  streamlit:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    working_dir: /app
+    command: streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./frontend:/app
+      - ./backend:/app/backend
+      - ~/pipe:/hostpipe
+      - ~/:/output
+    depends_on:
+      - backend
+
+  boaviztapi:
+    image: ghcr.io/boavizta/boaviztapi:latest
+    environment:
+      - SPECIAL_MESSAGE="<p>my welcome message in HTML format</p>"
+    ports:
+      - "5000:5000"

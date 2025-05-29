@@ -1,0 +1,29 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Directory for virtual environment
+venv/
+
+# Ignore data
+*.db
+
+# Ignore logs, coverage reports, etc.
+*.log
+.coverage
+
+# Ignore temporary files
+*~
+*.temp
