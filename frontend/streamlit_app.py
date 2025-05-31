@@ -7,6 +7,17 @@ from backend.carbon_intensity import fetch_carbon_intensity
 import subprocess
 import math
 
+st.title("Carbon as a Service" )
+
+FASTAPI_BASE_URL = "http://backend:8000" 
+
+response = requests.get("http://backend:8000/")
+
+#if response.status_code == 200:
+#    st.write(response.json()["message"])
+#else:
+#    st.error("Failed to connect to the backend")
+
 
 
 def Calculate_GPU_impact(die_size, ram_size):
@@ -115,17 +126,18 @@ def parse_system_info(system_info_text):
 
     return parsed_info
 
-def parse_disk_info(disk_lines):
+def parse_disk_info(disk_info_text):
     disks = []  # List to store disk information
-   
-    for line in disk_lines:
+    
+    lines = disk_info_text
+    for line in lines:
         parts = line.split()
-        # Example format: "nvme0n1 SSD N/A WD PC SN810 SDCPNRZ-2T00-1006 1.9T"
-        if len(parts) >= 6:  # Ensure we have enough components to parse
-            disk_type = parts[1]  # HDD or SSD
+        # Ensure the format fits, and check for SSD
+        if "SSD" in line and len(parts) >= 6:
+            disk_type = parts[1]
             manufacturer = parts[3]
             size_str = parts[-1]
-            
+
             # Convert size to GB
             if "T" in size_str:
                 size_in_gb = float(size_str.replace("T", "")) * 1024  # Convert TB to GB
@@ -133,16 +145,16 @@ def parse_disk_info(disk_lines):
                 size_in_gb = float(size_str.replace("G", ""))  # Already in GB
             else:
                 size_in_gb = "N/A"  # Unknown size format
-
-            # Add the parsed disk info as a dictionary
+            
             disk_info = {
                 "type": disk_type,
                 "size_GB": size_in_gb,
                 "manufacturer": manufacturer if manufacturer not in ["N/A", "Unknown"] else "N/A"
             }
-            disks.append(disk_info)  # Add to the disks list
-    
+            disks.append(disk_info)
+
     return disks
+
 
 # Fetch the system information
 system_info_text = fetch_system_info()
@@ -268,16 +280,6 @@ for idx, disk in enumerate(disks):
 #disk_info = get_disk_info()
 #st.write(disk_info) """
 
-st.title("Streamlit Frontend")
-
-FASTAPI_BASE_URL = "http://backend:8000" 
-
-response = requests.get("http://backend:8000/")
-
-if response.status_code == 200:
-    st.write(response.json()["message"])
-else:
-    st.error("Failed to connect to the backend")
 
 
 #try:
@@ -398,77 +400,133 @@ st.title("Storage Scope3 Calculation")
 
 st.subheader("Boavizta SSD Calculations", divider = True)
 
+
+# Separate SSDs and HDDs
+ssds = [disk for disk in disks if disk["type"] == "SSD"]
+hdds = [disk for disk in disks if disk["type"] == "HDD"]
+
 # Create input fields for SSD specifications
-ssd_capacity = st.number_input("Enter SSD Capacity (GB):", min_value=1, value=200)
-ssd_manufacturer = st.text_input("Enter SSD Manufacturer:", value="Samsung")
-left, middle, right = st.columns(3)
+# Select SSD
+#selected_ssd_index = st.selectbox("Select SSD:", options=range(len(disks)), format_func=lambda x: f"SSD {x + 1}")
+# Auto-fill input fields based on the selected SSD
+#selected_ssd = disks[selected_ssd_index]
+#ssd_capacity = st.number_input("Enter SSD Capacity (GB):", min_value=1, value=int(math.ceil(selected_ssd["size_GB"])))
+#ssd_manufacturer = st.text_input("Enter SSD Manufacturer:", value=selected_ssd["manufacturer"])
+#ssd_capacity = st.number_input("Enter SSD Capacity (GB):", min_value=1, value=200)
+#ssd_manufacturer = st.text_input("Enter SSD Manufacturer:", value="Samsung")
+if ssds:
+    # Select SSD
+    selected_ssd_index = st.selectbox("Select SSD:", options=range(len(ssds)), format_func=lambda x: f"SSD {x + 1}")
+    selected_ssd = ssds[selected_ssd_index]
+    ssd_capacity = st.number_input("Enter SSD Capacity (GB):", min_value=1, value=int(selected_ssd["size_GB"]))
+    ssd_manufacturer = st.text_input("Enter SSD Manufacturer:", value=selected_ssd["manufacturer"])
 
-if right.button("Fetch SSD Data"):
-    # HTTP POST request with inputs to FastAPI endpoint
-    try:
-        payload = {
-            "capacity": ssd_capacity,
-            "manufacturer": ssd_manufacturer,
-        }
-        response = requests.post("http://backend:8000/SSD-Calc", json=payload)
-        response.raise_for_status()  # Raise error for bad responses
-        ssd_data = response.json()
+    if st.button("Fetch SSD Data"):
+        try:
+            ssd_payload = {
+                "capacity": ssd_capacity,
+                "manufacturer": ssd_manufacturer,
+            }
+            response = requests.post("http://backend:8000/SSD-Calc", json=ssd_payload)
+            response.raise_for_status()
+            ssd_data = response.json()
 
-        # Display the first 6 impact entries
-        st.subheader("Impact Information:")
+            st.subheader("SSD Impact Information:")
+            impacts = ssd_data.get("impacts", {})
+            impact_keys = list(impacts.keys())[:6]
+            for key in impact_keys:
+                impact_info = impacts[key]
+                st.text(f"{key.upper()}")
+                st.text(f"Description: {impact_info['description']}")
+                st.text(f"Unit: {impact_info['unit']}")
+                st.text(f"Embedded Value: {impact_info['embedded']['value']} {impact_info['unit']}")
+                st.text("")  # Add a line break
 
-        impacts = ssd_data.get("impacts", {})
-        impact_keys = list(impacts.keys())[:6]  # Get the first 6 keys
+        except requests.RequestException as e:
+            st.error(f"Failed to retrieve SSD data: {str(e)}")
+else:
+    st.info("No SSDs detected in the system information.")
 
-        for key in impact_keys:
-            impact_info = impacts[key]
-            st.text(f"{key.upper()}")
-            st.text(f"Description: {impact_info['description']}")
-            st.text(f"Unit: {impact_info['unit']}")
-            st.text(f"Embedded Value: {impact_info['embedded']['value']} {impact_info['unit']}")
-           # st.text(f"Using value: {impact_info['use']['value']} {impact_info['unit']}")
-
-            st.text("")  # Add a line break
-
-    except requests.RequestException as e:
-        st.error(f"Failed to retrieve RAM data: {str(e)}")
 
 st.subheader("Boavizta HDD Calculations", divider = True)
 
+if hdds:
+    # Select HDD
+    selected_hdd_index = st.selectbox("Select HDD:", options=range(len(hdds)), format_func=lambda x: f"HDD {x + 1}")
+    selected_hdd = hdds[selected_hdd_index]
+    hdd_capacity = st.number_input("Enter HDD Capacity (GB):", min_value=1, value=int(selected_hdd["size_GB"]))
+    hdd_units = st.number_input("Enter HDD units:", min_value=1, value=1)
+
+    if st.button("Fetch HDD Data"):
+        try:
+            hdd_payload = {
+                "units": hdd_units,
+                "type": "HDD",
+                "capacity": hdd_capacity,
+            }
+            response = requests.post("http://backend:8000/HDD-Calc", json=hdd_payload)
+            response.raise_for_status()
+            hdd_data = response.json()
+
+            st.subheader("HDD Impact Information:")
+            impacts = hdd_data.get("impacts", {})
+            impact_keys = list(impacts.keys())[:6]
+            for key in impact_keys:
+                impact_info = impacts[key]
+                st.text(f"{key.upper()}")
+                st.text(f"Description: {impact_info['description']}")
+                st.text(f"Unit: {impact_info['unit']}")
+                st.text(f"Embedded Value: {impact_info['embedded']['value']} {impact_info['unit']}")
+                st.text("")  # Add a line break
+
+        except requests.RequestException as e:
+            st.error(f"Failed to retrieve HDD data: {str(e)}")
+else:
+    st.info("No HDDs detected in the system information.")
+
+# Select HDD with a filter for HDD type only
+#filtered_hdds = [disk for disk in disks if disk["type"] == "HDD"]
+#selected_hdd_index = st.selectbox("Select HDD:", options=range(len(filtered_hdds)), format_func=lambda x: f"HDD {x + 1}")
+
+
 # Create input fields for SSD specifications
-hdd_units = st.number_input("Enter HDD units :" , min_value =1)
-hdd_capacity = st.number_input("Enter HDD Capacity (GB): (Not Necessary)", min_value=1)
-hdd_type = "HDD"
-left, middle, right = st.columns(3)
-if right.button("Fetch HDD Data"):
-    # HTTP POST request with inputs to FastAPI endpoint
-    try:
-        payload = {
-            "units" : hdd_units,
-            "type" : hdd_type,
-            "capacity": hdd_capacity,        }
-        response = requests.post("http://backend:8000/HDD-Calc", json=payload)
-        response.raise_for_status()  # Raise error for bad responses
-        hdd_data = response.json()
-
-        # Display the first 6 impact entries
-        st.subheader("Impact Information:")
-
-        impacts = hdd_data.get("impacts", {})
-        impact_keys = list(impacts.keys())[:6]  # Get the first 6 keys
-
-        for key in impact_keys:
-            impact_info = impacts[key]
-            st.text(f"{key.upper()}")
-            st.text(f"Description: {impact_info['description']}")
-            st.text(f"Unit: {impact_info['unit']}")
-            st.text(f"Embedded Value: {impact_info['embedded']['value']} {impact_info['unit']}")
-           # st.text(f"Using value: {impact_info['use']['value']} {impact_info['unit']}")
-
-            st.text("")  # Add a line break
-
-    except requests.RequestException as e:
-        st.error(f"Failed to retrieve RAM data: {str(e)}")
+#hdd_units = st.number_input("Enter HDD units :" , min_value =1)
+#hdd_capacity = st.number_input("Enter HDD Capacity (GB): (Not Necessary)", min_value=1)
+#hdd_type = "HDD"
+# Auto-fill input fields based on the selected HDD
+#selected_hdd = filtered_hdds[selected_hdd_index]
+#hdd_capacity = st.number_input("Enter HDD Capacity (GB):", min_value=1, value=int(math.ceil((selected_hdd["size_GB"]))))
+#hdd_units = st.number_input("Enter HDD units:", min_value=1, value=1)
+#left, middle, right = st.columns(3)
+#if right.button("Fetch HDD Data"):
+#    # HTTP POST request with inputs to FastAPI endpoint
+#    try:
+#        payload = {
+#            "units" : hdd_units,
+#            "type" : hdd_type,
+#            "capacity": hdd_capacity,        }
+#        response = requests.post("http://backend:8000/HDD-Calc", json=payload)
+#        response.raise_for_status()  # Raise error for bad responses
+#        hdd_data = response.json()
+#
+#        # Display the first 6 impact entries
+#        st.subheader("Impact Information:")
+#
+#        impacts = hdd_data.get("impacts", {})
+#        impact_keys = list(impacts.keys())[:6]  # Get the first 6 keys
+#
+#        for key in impact_keys:
+#            impact_info = impacts[key]
+#            st.text(f"{key.upper()}")
+#            st.text(f"Description: {impact_info['description']}")
+#            st.text(f"Unit: {impact_info['unit']}")
+#            st.text(f"Embedded Value: {impact_info['embedded']['value']} {impact_info['unit']}")
+#           # st.text(f"Using value: {impact_info['use']['value']} {impact_info['unit']}")
+#
+#            st.text("")  # Add a line break
+#
+#    except requests.RequestException as e:
+#        st.error(f"Failed to retrieve RAM data: {str(e)}")
 
 
 st.title("Server Case Scope3 Calculation")
@@ -564,7 +622,7 @@ try:
     df_elec = pd.DataFrame(breakdown.items(), columns=["Source", "Power (MW)"])
 
     # Display JSON breakdown
-    st.json(breakdown)
+    #st.json(breakdown)
 
     # Create pie chart
     fig = px.pie(df_elec, values='Power (MW)', names='Source', title="Energy Production Breakdown")
