@@ -28,13 +28,13 @@ RUN apt-get update && apt-get install -y freeipmi-tools
 RUN apt-get update && apt-get install -y sudo util-linux
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
-    wget unzip curl gnupg2 \
-    chromium chromium-driver
+#RUN apt-get update && apt-get install -y \
+#    wget unzip curl gnupg2 \
+#    chromium chromium-driver
 
 # Set environment variables for Selenium
-ENV CHROME_BIN=/usr/bin/chromium
-ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
+#ENV CHROME_BIN=/usr/bin/chromium
+#ENV CHROMEDRIVER_PATH=/usr/bin/chromedriver
 
 WORKDIR /app
 
@@ -46,6 +46,9 @@ COPY requirements.txt .
 #COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 #RUN pip install -r requirements.txt
+
+# Install dbgpu or other necessary packages
+RUN pip install dbgpu[all]
 
 #COPY app/main.py ./app/
 COPY . .

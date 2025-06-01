@@ -6,3 +6,4 @@ apscheduler
 selenium
 beautifulsoup4
 psutil
+dbgpu[all]

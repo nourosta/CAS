@@ -112,7 +112,8 @@ def parse_system_info(system_info_text):
     parsed_info = {
         "CPU": "Unknown",
         "RAM": "Unknown",
-        "Disk": []
+        "Disk": [],
+        "GPUs": []
     }
 
     lines = system_info_text.splitlines()
@@ -123,8 +124,12 @@ def parse_system_info(system_info_text):
             parsed_info["RAM"] = line.split(": ")[1].strip()
         if "SSD" in line or "HDD" in line:
             parsed_info["Disk"].append(line.strip())
+        if "GPU:" in line:
+            gpu_info = line.split(": ")[1].strip()
+            parsed_info["GPUs"].append(gpu_info)
 
     return parsed_info
+
 
 def parse_disk_info(disk_info_text):
     disks = []  # List to store disk information
@@ -156,27 +161,58 @@ def parse_disk_info(disk_info_text):
     return disks
 
 
+def parse_gpu_info(gpu_info_text):
+    gpus = []  # List to store GPU information
+
+    lines = gpu_info_text
+    for line in lines:
+        # Check if the line contains GPU information
+        if "GPU:" in line:
+            parts = line.split(": ")
+            if len(parts) >= 2:
+                gpu_model = parts[1].strip()
+                gpu_info = {
+                    "model": gpu_model
+                }
+                gpus.append(gpu_info)
+
+    return gpus
+
+
+
+
 # Fetch the system information
 system_info_text = fetch_system_info()
 parsed_info = parse_system_info(system_info_text)
+gpus = parse_gpu_info(parsed_info["GPUs"])
+
 detected_cpu = parsed_info["CPU"]
 detected_ram = parsed_info["RAM"]
+detected_GPU = parsed_info["GPUs"]
 st.title("System Information")
 
 # Autofill fields based on the parsed CPU and RAM information
 st.text(f"CPU Name: {detected_cpu}")
 st.text(f"Total RAM: {detected_ram}")
+#st.text(f"GPUs: {detected_GPU}")
 
 # Parse the disk info
-disks = parse_disk_info(parsed_info["Disk"])
+detected_disks = parse_disk_info(parsed_info["Disk"])
 
 # Display disk information for each disk
-for idx, disk in enumerate(disks):
+for idx, disk in enumerate(detected_disks):
     st.text(f"Disk {idx + 1}:")
     st.text(f"    Type: {disk['type']}")
     st.text(f"    Size (GB): {disk['size_GB']}")
     st.text(f"    Manufacturer: {disk['manufacturer']}")
-    st.text("")  # Add a line break for clarity
+    st.text("")  # back to line
+
+# Display GPU information for each GPU
+for idx, gpu in enumerate(detected_GPU):
+    st.text(f"GPU {idx + 1}:")
+    st.text(f"    Model: {gpu}")
+    st.text("")  # Back to line
+
 
 ## Function to read the contents of a file
 #def read_output(file_path):
@@ -402,8 +438,8 @@ st.subheader("Boavizta SSD Calculations", divider = True)
 
 
 # Separate SSDs and HDDs
-ssds = [disk for disk in disks if disk["type"] == "SSD"]
-hdds = [disk for disk in disks if disk["type"] == "HDD"]
+ssds = [disk for disk in detected_disks if disk["type"] == "SSD"]
+hdds = [disk for disk in detected_disks if disk["type"] == "HDD"]
 
 # Create input fields for SSD specifications
 # Select SSD
@@ -590,7 +626,7 @@ st.subheader("Boavizta GPU Calculations", divider = True,      help="Based on fo
 left, right = st.columns(2)
 
 with left:
-    gpu_brand = st.text_input("GPU Brand")
+    gpu_brand = st.text_input("GPU Model")
 
 with right:
     die_size = st.number_input("GPU Die Size (mm²)", min_value=0.1, format="%.2f")
@@ -605,6 +641,9 @@ if st.button("Calculate GPU Impact"):
         st.text(f"GPU PE: {gpu_impacts[2]:.2f} MJ")
     else:
         st.warning("Please provide all required inputs.")
+
+
+st.title("Power and Carbon")
 
 ### Display Power Breakdown
 
