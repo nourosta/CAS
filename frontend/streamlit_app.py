@@ -6,6 +6,7 @@ from backend.electricitymaps import fetch_power_breakdown
 from backend.carbon_intensity import fetch_carbon_intensity
 import subprocess
 import math
+from dbgpu import GPUDatabase
 
 st.title("Carbon as a Service" )
 
@@ -623,24 +624,41 @@ st.title("GPU Scope3 Calculation (API non Present)")
 
 st.subheader("Boavizta GPU Calculations", divider = True,      help="Based on formula found in the following article: https://hal.science/hal-04643414v1/document")
 
-left, right = st.columns(2)
+gpus = [gpu for gpu in detected_GPU]
 
-with left:
-    gpu_brand = st.text_input("GPU Model")
 
-with right:
-    die_size = st.number_input("GPU Die Size (mm²)", min_value=0.1, format="%.2f")
-    ram_size = st.number_input("RAM Size (GB)", min_value=1)
+if gpus:
+    # Select GPU
+    selected_gpu_index = st.selectbox("Select GPU:", options=range(len(gpus)), format_func=lambda x: f"GPU {x + 1}")
+    selected_gpu = gpus[selected_gpu_index]
+    gpu_brand = st.text_input("GPU Model", value=selected_gpu)
 
-if st.button("Calculate GPU Impact"):
-    if gpu_brand and die_size > 0 and ram_size > 0:  # Ensure values are provided
-        gpu_impacts = Calculate_GPU_impact(die_size, ram_size)
-        st.success(f"Calculations for {gpu_brand}:")
-        st.text(f"GPU GWP: {gpu_impacts[0]:.2f} kgCO2eq")
-        st.text(f"GPU ADP: {gpu_impacts[1]:.2e} kgSbeq")
-        st.text(f"GPU PE: {gpu_impacts[2]:.2f} MJ")
-    else:
-        st.warning("Please provide all required inputs.")
+    database = GPUDatabase.default()
+    try:
+        # Search for GPU specifications locally
+        spec = database.search(gpu_brand)
+        die_size = spec.die_size_mm2
+        ram_size = spec.memory_size_gb
+    except KeyError:
+        st.error(f"Could not find specifications for GPU: {gpu_brand}")
+        die_size = 0.1  # Set default to avoid input errors
+        ram_size = 1
+
+    die_size_input = st.number_input("GPU Die Size (mm²)", format="%.2f", value=die_size)
+    ram_size_input = st.number_input("RAM Size (GB)", value=ram_size)
+
+    if st.button("Calculate GPU Impact"):
+        if gpu_brand and die_size > 0 and ram_size > 0:
+            # Assume there's a Calculate_GPU_impact function that requires these values
+            gpu_impacts = Calculate_GPU_impact(die_size, ram_size)
+            st.success(f"Calculations for {gpu_brand}:")
+            st.text(f"GPU GWP: {gpu_impacts[0]:.2f} kgCO2eq")
+            st.text(f"GPU ADP: {gpu_impacts[1]:.2e} kgSbeq")
+            st.text(f"GPU PE: {gpu_impacts[2]:.2f} MJ")
+        else:
+            st.warning("Please provide all required inputs.")
+else:
+    st.info("No GPUs detected in the system information.")
 
 
 st.title("Power and Carbon")

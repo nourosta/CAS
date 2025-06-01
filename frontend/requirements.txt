@@ -3,3 +3,4 @@ requests
 pandas
 plotly
 plotly.express
+dbgpu[all]
