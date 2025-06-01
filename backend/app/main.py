@@ -8,7 +8,6 @@ from db import init_db, store_power_breakdown, store_carbon_intensity
 from gpu_scraper import scrape_and_store_gpu_data
 from datetime import datetime
 import os
-from dbgpu import GPUDatabase
 #from apscheduler.schedulers.background import BackgroundScheduler
 
 app = FastAPI()
@@ -198,16 +197,3 @@ def get_system_info():
         return {"error": str(e)}
 
     
-
-database = GPUDatabase.default()
-@app.get("/gpu-specs")
-def get_gpu_specs(model: str):
-    
-    spec = database.search(model.strip())
-    if not spec:
-        raise HTTPException(status_code=404, detail="GPU not found")
-    
-    return {
-        "die_size": spec.get("die_size", 0.0),
-        "ram_size": spec.get("ram_size", 1),
-    }
