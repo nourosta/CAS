@@ -13,6 +13,12 @@ import os
 app = FastAPI()
 
 
+# Access environment variables
+cpu_name = os.getenv('CPU_NAME', 'Unknown')
+total_ram = os.getenv('TOTAL_RAM', 'Unknown')
+disk_info = os.getenv('DISK_INFO', 'Unknown')
+gpu_info = os.getenv('GPU_INFO', 'Unknown')
+
 # Initialize the database
 @app.on_event("startup")
 def on_startup():
@@ -188,12 +194,19 @@ async def get_carbon_intensity(zone: str = 'FR'):
 
 @app.get("/system-info")
 def get_system_info():
-    try:
-        with open("/output/system_info.txt", "r") as f:  # Adjust path as needed
-            return {"system_info": f.read()}
-    except FileNotFoundError:
-        return {"error": "System information file not found."}
-    except Exception as e:
-        return {"error": str(e)}
+    # Access information via environment variables
+    cpu_name = os.getenv('CPU_NAME', 'Unknown')
+    total_ram = os.getenv('TOTAL_RAM', 'Unknown')
+    disk_info = os.getenv('DISK_INFO', 'Unknown')
+    gpu_info = os.getenv('GPU_INFO', 'Unknown')
+
+    system_info = f"""
+    CPU Name: {cpu_name}
+    Total RAM: {total_ram}
+    Disk Info: {disk_info}
+    GPU Info: {gpu_info}
+    """
+
+    return {"system_info": system_info.strip()}
 
     

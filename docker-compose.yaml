@@ -11,12 +11,17 @@ services:
     pid: "host"      # Share PID namespace with the host
     volumes:
       - ./backend/data:/app/data  # Persist the data folder for SQLite or other files
-      - ~/pipe:/hostpipe  # Mount the named pipe directory
-      - ~/:/output  # Mount the home directory for output files
+      #- ~/pipe:/hostpipe  # Mount the named pipe directory
+      #- ~/:/output  # Mount the home directory for output files
 
       
     #environment:
     #  - DATABASE_URL=sqlite:///app/data/data.db
+    environment:
+      - CPU_NAME=${CPU_NAME}
+      - TOTAL_RAM=${TOTAL_RAM}
+      - DISK_INFO=${DISK_INFO}
+      - GPU_INFO=${GPU_INFO}
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   streamlit:

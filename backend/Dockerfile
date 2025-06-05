@@ -48,7 +48,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 #RUN pip install -r requirements.txt
 
 # Install dbgpu or other necessary packages
-RUN pip install dbgpu[all]
+#RUN pip install dbgpu[all]
 
 #COPY app/main.py ./app/
 COPY . .

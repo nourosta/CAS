@@ -1,6 +1,6 @@
 streamlit
 requests
-pandas
+#pandas
 plotly
 plotly.express
 dbgpu[all]

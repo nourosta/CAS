@@ -118,16 +118,16 @@ def parse_system_info(system_info_text):
     }
 
     lines = system_info_text.splitlines()
-    for i, line in enumerate(lines):
-        if "CPU Name:" in line:
+    for line in lines:
+        line = line.strip()
+        if line.startswith("CPU Name:"):
             parsed_info["CPU"] = line.split(": ")[1].strip()
-        if "Total RAM:" in line:
+        elif line.startswith("Total RAM:"):
             parsed_info["RAM"] = line.split(": ")[1].strip()
-        if "SSD" in line or "HDD" in line:
-            parsed_info["Disk"].append(line.strip())
-        if "GPU:" in line:
-            gpu_info = line.split(": ")[1].strip()
-            parsed_info["GPUs"].append(gpu_info)
+        elif line.startswith("Disk Info:"):
+            parsed_info["Disk"].append(line.split(": ")[1].strip())
+        elif line.startswith("GPU Info:"):
+            parsed_info["GPUs"].append(line.split(": ")[1].strip())
 
     return parsed_info
 
@@ -213,132 +213,6 @@ for idx, gpu in enumerate(detected_GPU):
     st.text(f"GPU {idx + 1}:")
     st.text(f"    Model: {gpu}")
     st.text("")  # Back to line
-
-
-## Function to read the contents of a file
-#def read_output(file_path):
-#    try:
-#        with open(file_path, 'r') as f:
-#            return f.read()
-#    except FileNotFoundError:
-#        return "Output file not found. Please run the command again."
-#    except Exception as e:
-#        return f"Error reading file: {e}"
-#
-## Title of the app
-#st.title("System Information")
-#
-## Section for Hardware Information
-#st.header("Hardware Information")
-#hardware_info = read_output("/output/hardware_info.txt")
-#st.text(hardware_info)
-#
-## Section for Memory Information
-#st.header("Memory Information")
-#memory_info = read_output("/output/memory_info.txt")
-#st.text(memory_info)
-#
-## Refresh Actions
-#if st.button("Refresh Hardware Info"):
-#    try:
-#        with open('/hostpipe/mypipe', 'w') as pipe:
-#            pipe.write("lshw")
-#        st.success("Lshw command sent successfully.")
-#    except FileNotFoundError:
-#        st.error("Named pipe not found. Check Docker volume mounts.")
-#
-#if st.button("Refresh Memory Info"):
-#    try:
-#        with open('/hostpipe/mypipe', 'w') as pipe:
-#            pipe.write("lsmem")
-#        st.success("Memory info command sent successfully.")
-#    except FileNotFoundError:
-#        st.error("Named pipe not found. Check Docker volume mounts.")
-
-#""" def read_output(file_path):
-#    try:
-#        with open(file_path, 'r') as f:
-#            return f.read()
-#    except Exception as e:
-#        return f"Error reading file: {e}"
-#
-## Title of the app
-#st.title("System Information")
-#
-## Section for Hardware Information
-#st.header("Hardware Information")
-#hardware_info = read_output("/output/hardware_info.txt")  # Adjusting path for Docker
-#st.text(hardware_info)
-#
-## Section for Memory Information
-#st.header("Memory Information")
-#memory_info = read_output("/output/memory_info.txt")
-#st.text(memory_info)
-#
-## Section for Command Output
-#st.header("Output of Other Commands")
-#command_output = read_output("/output/output.txt")
-#st.text(command_output)
-#
-## Optionally, add a button to run the lshw command
-#if st.button("Refresh Hardware Info"):
-#    # Send command to the named pipe
-#    command_to_send = "lshw"
-#    with open('/hostpipe/mypipe', 'w') as pipe:
-#        pipe.write(command_to_send)
-#    st.success("Running lshw command...") """
-#
-#""" def get_cpu_info():
-#    return subprocess.check_output("cat /proc/cpuinfo", shell=True).decode()
-#
-#def get_ram_info():
-#    try:
-#        return subprocess.check_output("lshw -short", shell=True).decode()
-#    except subprocess.CalledProcessError as e:
-#        return f"Failed to get hardware info: {e}"
-#
-#def get_disk_info():
-#    return subprocess.check_output("df -h", shell=True).decode()
-#
-#st.title("System Information")
-#
-## Fetch and display the CPU information
-#st.header("CPU Information")
-#cpu_info = get_cpu_info()
-#st.write(cpu_info)
-#
-## Fetch and display the RAM information
-#st.header("RAM Information")
-#ram_info = get_ram_info()
-#st.write(ram_info)
-#
-## Fetch and display the disk information
-#st.header("Disk Information")
-#disk_info = get_disk_info()
-#st.write(disk_info) """
-
-
-
-#try:
-#    cpu_name = requests.get("http://boaviztapi:5000/v1/utils/cpu_name", headers={"accept": "application/json"})
-#    cpu_name.raise_for_status()  # Raise an error for bad responses
-#    data = cpu_name.json()
-#    st.write(data)
-#except requests.RequestException as e:
-#    st.error(f"Failed to fetch data from Boavizta API: {str(e)}")
-
-
-#st.subheader("Configuration Identification", divider = True)
-#
-#try:
-#    config_response = requests.post("http://backend:8000/get-config")
-#    config_response.raise_for_status()
-#    config_data = config_response.json()
-#    
-#    st.json(config_data)  # Adjust output processing if needed
-#except requests.RequestException as e:
-#    st.error(f"Failed to retrieve system configuration: {str(e)}")
-
 
 
 
