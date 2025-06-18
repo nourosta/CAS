@@ -1,0 +1,41 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: frontend-deployment
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: frontend
+#   template:
+#     metadata:
+#       labels:
+#         app: frontend
+#     spec:
+#       containers:
+#       - name: frontend
+#         image: nourosta/frontend:latest
+#         ports:
+#         - containerPort: 8501
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-app
+  namespace: carbonservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend-app
+  template:
+    metadata:
+      labels:
+        app: frontend-app
+    spec:
+      containers:
+      - name: frontend-app
+        image: nourosta/frontend:latest
+        ports:
+        - containerPort: 8501  # Change based on your Streamlit port

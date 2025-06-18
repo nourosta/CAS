@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boaviztapi
+  namespace: carbonservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: boaviztapi
+  template:
+    metadata:
+      labels:
+        app: boaviztapi
+    spec:
+      containers:
+      - name: boaviztapi
+        image: ghcr.io/boavizta/boaviztapi:latest
+        ports:
+        - containerPort: 5000

@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-app
+  namespace: carbonservice
+spec:
+  selector:
+    app: backend-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000  # Match to backend's container port
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-app
+  namespace: carbonservice
+spec:
+  selector:
+    app: frontend-app
+  ports:
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501  # Match to frontend's container port
+  type: ClusterIP
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: boaviztapi
+  namespace: carbonservice
+spec:
+  selector:
+    app: boaviztapi
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000  # This should match the containerPort of boaviztapi
+  type: ClusterIP  # Can also use NodePort or LoadBalancer depending on your use case
+

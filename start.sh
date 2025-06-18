@@ -25,4 +25,6 @@ else
 fi
 
 # Start Docker Compose
-docker compose up --build
+#docker compose up --build
+
+docker compose up -d

@@ -56,4 +56,4 @@ COPY . .
 EXPOSE 8000
 
 #CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-CMD ["sh", "-c", "echo 'CPU Information:' && cat /proc/cpuinfo && echo 'RAM Information:' && lshw -short && echo 'Disk Information:' && df -h && exec uvicorn main:app --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "echo 'CPU Information:' && cat /proc/cpuinfo && echo 'RAM Information:' && lshw -short && echo 'Disk Information:' && df -h && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

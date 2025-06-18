@@ -1,0 +1,43 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: backend-deployment
+#   labels:
+#     app: backend
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: backend
+#   template:
+#     metadata:
+#       labels:
+#         app: backend
+#     spec:
+#       containers:
+#         - name: backend
+#           image: nourosta/backend:latest
+#           ports:
+#             - containerPort: 8000
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-app
+  namespace: carbonservice
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend-app
+  template:
+    metadata:
+      labels:
+        app: backend-app
+    spec:
+      containers:
+      - name: backend-app
+        image: nourosta/backend:latest
+        ports:
+        - containerPort: 8000  # Change based on your backend port

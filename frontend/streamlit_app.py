@@ -2,17 +2,17 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
-from backend.electricitymaps import fetch_power_breakdown
-from backend.carbon_intensity import fetch_carbon_intensity
+#from backend.electricitymaps import fetch_power_breakdown
+#from backend.carbon_intensity import fetch_carbon_intensity
 import subprocess
 import math
 from dbgpu import GPUDatabase
 
 st.title("Carbon as a Service" )
 
-FASTAPI_BASE_URL = "http://backend:8000" 
+FASTAPI_BASE_URL = "http://backend-app:8000" 
 
-response = requests.get("http://backend:8000/")
+response = requests.get("http://backend-app:8000/")
 
 #if response.status_code == 200:
 #    st.write(response.json()["message"])
@@ -50,7 +50,7 @@ def Calculate_GPU_impact(die_size, ram_size):
             "process": 30
         }
         # Call RAM impact API
-        response = requests.post("http://backend:8000/RAM-Calc", json=payload)
+        response = requests.post(f"{FASTAPI_BASE_URL}/RAM-Calc", json=payload)
         response.raise_for_status()  # Raise error for bad responses
         ram_data = response.json()
 
@@ -102,7 +102,7 @@ def Calculate_GPU_impact(die_size, ram_size):
 
 def fetch_system_info():
     try:
-        response = requests.get("http://backend:8000/system-info")
+        response = requests.get(f"{FASTAPI_BASE_URL}/system-info")
         response.raise_for_status()
         data = response.json()
         return data.get("system_info", "No data found.")
@@ -233,7 +233,7 @@ if right.button("Fetch CPU Data"):
         payload = {
             "name" : cpu_name
         }
-        response = requests.post("http://backend:8000/CPU-Calc", json=payload)
+        response = requests.post(f"{FASTAPI_BASE_URL}/CPU-Calc", json=payload)
         response.raise_for_status()  # Raise error for bad responses
         cpu_data = response.json()
 
@@ -278,7 +278,7 @@ if right.button("Fetch RAM Data"):
             "manufacturer": ram_manufacturer,
             "process": ram_process
         }
-        response = requests.post("http://backend:8000/RAM-Calc", json=payload)
+        response = requests.post(f"{FASTAPI_BASE_URL}/RAM-Calc", json=payload)
         response.raise_for_status()  # Raise error for bad responses
         ram_data = response.json()
 
@@ -338,7 +338,7 @@ if ssds:
                 "capacity": ssd_capacity,
                 "manufacturer": ssd_manufacturer,
             }
-            response = requests.post("http://backend:8000/SSD-Calc", json=ssd_payload)
+            response = requests.post(f"{FASTAPI_BASE_URL}/SSD-Calc", json=ssd_payload)
             response.raise_for_status()
             ssd_data = response.json()
 
@@ -375,7 +375,7 @@ if hdds:
                 "type": "HDD",
                 "capacity": hdd_capacity,
             }
-            response = requests.post("http://backend:8000/HDD-Calc", json=hdd_payload)
+            response = requests.post(f"{FASTAPI_BASE_URL}/HDD-Calc", json=hdd_payload)
             response.raise_for_status()
             hdd_data = response.json()
 
@@ -416,7 +416,7 @@ else:
 #            "units" : hdd_units,
 #            "type" : hdd_type,
 #            "capacity": hdd_capacity,        }
-#        response = requests.post("http://backend:8000/HDD-Calc", json=payload)
+#        response = requests.post(f"{FASTAPI_BASE_URL}/HDD-Calc", json=payload)
 #        response.raise_for_status()  # Raise error for bad responses
 #        hdd_data = response.json()
 #
@@ -454,7 +454,7 @@ if right.button("Fetch Case Data"):
         payload = {
             "case_type": case_type,
         }
-        response = requests.post("http://backend:8000/Case-Calc", json=payload)
+        response = requests.post(f"{FASTAPI_BASE_URL}/Case-Calc", json=payload)
         response.raise_for_status()  # Raise error for bad responses
         case_data = response.json()
 
