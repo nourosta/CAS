@@ -5,7 +5,7 @@
 bash "$(dirname "$0")/scripts/collect_system_info.sh"
 
 # Define location of the output file
-SYSTEM_INFO_FILE="$HOME/system_info.txt"
+SYSTEM_INFO_FILE="$(dirname "$0")/backend/data/system_info.txt"
 
 # Check if the file exists
 if [[ -f "$SYSTEM_INFO_FILE" ]]; then
