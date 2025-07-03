@@ -265,7 +265,7 @@ st.title("Boavizta RAM Calculation")
 st.subheader("RAM Scope3 Calculations", divider = True)
 
 # Create input fields for RAM specifications
-ram_capacity = st.number_input("Enter RAM Capacity (GB):", min_value=1, max_value=128, value=int(math.ceil(float(parsed_info["RAM"].split()[0]) if parsed_info["RAM"] != "Unknown" else 32)))
+ram_capacity = st.number_input("Enter RAM Capacity (GB):", min_value=1, value=int(math.ceil(float(parsed_info["RAM"].split()[0]) if parsed_info["RAM"] != "Unknown" else 32)))
 ram_manufacturer = st.text_input("Enter RAM Manufacturer:", value="Samsung")
 ram_process = st.number_input("Enter Process (nm):", min_value=1, max_value=100, value=30)
 left, middle, right = st.columns(3)
