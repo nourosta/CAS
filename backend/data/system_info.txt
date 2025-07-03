@@ -1,23 +1,16 @@
-AMD Ryzen 7 8845HS w/ Radeon 780M Graphics
-Total RAM: $(awk /MemTotal/ {printf %.2f GiB
-, /1024/1024} /proc/meminfo)
-=== Disk Information ===
-NAME  ROTA   SIZE MODEL
-nbd0     0     0B 
-nbd1     0     0B 
-nbd2     0     0B 
-nbd3     0     0B 
-nbd4     0     0B 
-nbd5     0     0B 
-nbd6     0     0B 
-nbd7     0     0B 
-vda      1     1T 
-vdb      1 561.7M 
-nbd8     0     0B 
-nbd9     0     0B 
-nbd10    0     0B 
-nbd11    0     0B 
-nbd12    0     0B 
-nbd13    0     0B 
-nbd14    0     0B 
-nbd15    0     0B 
+=== CPU Information ===
+CPU Name: AMD Ryzen 7 8845HS w/ Radeon 780M Graphics
+
+=== RAM Information ===
+Total RAM: 30.63 GB
+Run script as root (sudo) to get RAM manufacturer.
+
+=== Disk Storage Information ===
+Disk devices detected:
+NAME HDD N/A MODEL  SIZE
+nvme0n1 SSD N/A WD PC SN810 SDCPNRZ-2T00-1006  1.9T
+
+=== GPU Information ===
+GPU: Phoenix3
+
+Note: For full RAM manufacturer info, run this script with sudo.

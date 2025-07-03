@@ -3,7 +3,9 @@
 echo "Collecting System Information..."
 
 # Define output file
-OUTPUT_FILE="$HOME/system_info_nour.txt"
+#OUTPUT_FILE="$HOME/system_info_nour.txt"
+PROJECT_DIR="$(dirname "$0")/../backend/data"
+OUTPUT_FILE="$PROJECT_DIR/system_info.txt"
 
 {
     # CPU Information
