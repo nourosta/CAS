@@ -148,7 +148,7 @@ def parse_disk_info(disk_info_text):
             if "T" in size_str:
                 size_in_gb = float(size_str.replace("T", "")) * 1024  # Convert TB to GB
             elif "G" in size_str:
-                size_in_gb = float(size_str.replace("G", ""))  # Already in GB
+                size_in_gb = float(size_str.replace("G", "").replace(',','.'))  # Already in GB
             else:
                 size_in_gb = "N/A"  # Unknown size format
             

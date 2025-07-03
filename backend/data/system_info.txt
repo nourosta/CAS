@@ -11,6 +11,5 @@ NAME HDD N/A MODEL  SIZE
 nvme0n1 SSD N/A WD PC SN810 SDCPNRZ-2T00-1006  1.9T
 
 === GPU Information ===
+Using lshw for GPU detection.
 GPU: Phoenix3
-
-Note: For full RAM manufacturer info, run this script with sudo.
