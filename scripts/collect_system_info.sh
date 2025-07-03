@@ -59,21 +59,43 @@ OUTPUT_FILE="$PROJECT_DIR/system_info.txt"
     echo ""
 
     # GPU Information
+    # echo "=== GPU Information ==="
+    # if command -v lshw >/dev/null 2>&1; then
+    #     gpu_info=$(lshw -C display | awk -F: '/product:/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print "GPU: "$2}')
+    #     if [ -z "$gpu_info" ]; then
+    #         echo "No GPU detected."
+    #     else
+    #         echo "$gpu_info"
+    #     fi
+    # else
+    #     echo "lshw not installed, skipping GPU information."
+    # fi
+
+    # echo ""
+    # echo "Note: For full RAM manufacturer info, run this script with sudo."
     echo "=== GPU Information ==="
-    if command -v lshw >/dev/null 2>&1; then
+
+    if command -v nvidia-smi >/dev/null 2>&1; then
+        echo "NVIDIA GPU detected."
+        # Use nvidia-smi to get detailed GPU information
+        gpu_info=$(nvidia-smi --query-gpu=name --format=csv,noheader)
+        if [ -z "$gpu_info" ]; then
+            echo "Failed to retrieve NVIDIA GPU information."
+        else
+            echo "GPU: $gpu_info"
+        fi
+    elif command -v lshw >/dev/null 2>&1; then
+        echo "Using lshw for GPU detection."
         gpu_info=$(lshw -C display | awk -F: '/product:/ {gsub(/^[ \t]+|[ \t]+$/, "", $2); print "GPU: "$2}')
         if [ -z "$gpu_info" ]; then
-            echo "No GPU detected."
+            echo "No GPU detected using lshw."
         else
             echo "$gpu_info"
         fi
     else
-        echo "lshw not installed, skipping GPU information."
+        echo "Neither lshw nor nvidia-smi installed, skipping GPU information."
     fi
-
-    echo ""
-    echo "Note: For full RAM manufacturer info, run this script with sudo."
-} > "$OUTPUT_FILE"
+  } > "$OUTPUT_FILE"
 
 echo "System information saved to $OUTPUT_FILE"
 
